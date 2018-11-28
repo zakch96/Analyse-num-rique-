@@ -84,10 +84,17 @@ int main(){
     cout << "" << endl ; 
     cout << "MAX EIGEN VALUE TEST " << endl;
     double * x = create_col(4);
+    double * x2 = create_col(4);
     double x_copy[] = {1.5,-1,0,1};
     for (int i = 0; i < 4; i++) x[i] = x_copy[i];
     double max_lambda = max_eigenvalue(mat3, 4, x, 0.0001);
     cout << "max_lambda = " << max_lambda << endl;
+    cout << "MIN EIGEN VALUE TEST " << endl;
+    double x_copy2[] = {1.5,-1,0,1};
+    for (int i = 0; i < 4; i++) x2[i] = x_copy2[i];
+
+    double min_lambda = min_eigenvalue(mat3, 4, x2, 0.0001);
+    cout << "min_lambda = " << min_lambda << endl;
 
     //free memory
     free_matrix(mat1,5);

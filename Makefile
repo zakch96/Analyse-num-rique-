@@ -19,7 +19,7 @@ iterative_methods.o: iterative_methods.cpp cholesky.h matrix.h
 cholesky.o: cholesky.cpp matrix.h
 	$(CC) $(CFLAGS) -c cholesky.cpp
 
-eigen_value_computation.o: eigen_value_computation.cpp matrix.h
+eigen_value_computation.o: eigen_value_computation.cpp cholesky.h
 	$(CC) $(CFLAGS) -c eigen_value_computation.cpp
 
 matrix.o: matrix.cpp matrix.h 
