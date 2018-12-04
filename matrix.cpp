@@ -158,6 +158,46 @@ void mat_initialize(double ** mat, int n, int m, double a, double b){
 	}
 }
 
+void column_initialize(double * col, int n, int m, double a, double b){
+	//VARIABLES INITIALIZATION
+	//int dim = n * m;
+	//int ind = 0;
+	double * x = new double[m];
+	double * y = new double[n];
+	double h = a/m+1;
+	double k = b/n+1;
+
+	for(int i = 0; i < m; i++){
+		for (int j = 0; j < n; j++)
+			col[i+(j-1)*m] = f(x[i],y[j]);
+	}
+
+	for(int i = 0; i < m; i++){
+		x[i] = i * h;
+	}
+	for(int i = 0; i < n; i++){
+		y[i] = i * k;
+	}
+
+	for ( int i = 0; i < m-1; i++){
+		col[i + (n-1)*m] = f(i, n) + (g(x[i], b)/pow(k,2));
+	}
+	for ( int i = 0; i < m-1; i++){
+		col[i] = f(i, 1) + (g(x[i], 0)/pow(k,2));
+	}
+	for ( int j = 0; j < n-1; j++){
+		col[1+(j-1)*m] = f(1, j) + (g(0, y[j])/pow(h,2));
+	}
+	for ( int j = 0; j < n-1; j++){
+		col[m+(j-1)*m] = f(m, j) + (g(a, y[j])/pow(h,2));
+	}
+	col[0] = f(h, k) + g(h, 0)/pow(k, 2) + g(0, k)/pow(h, 2);
+	col[m-1] = f(h*m, k) + g(m*h, 0)/pow(k, 2) + g(a, k)/pow(h, 2);
+	col[(n-1)*m-1] = f(h, n*k) + g(0, n*k)/pow(h, 2) + g(h, b)/pow(k, 2);
+	col[m + (n-1)*m-1] = f(m*h, n*k) + g(a, n*k)/pow(h, 2) + g(m*h, b)/pow(k, 2);
+	return;
+}
+
 double scalar_product(double *col1, double * col2, int n){
 	double res = 0.0 ; 
 	for ( int i = 0; i < n; i++){
@@ -172,7 +212,6 @@ double norm(double * col1, int n){
 		res += col1[i]*col1[i];
 	}
 	res = sqrt(res);
-	cout << "res = " << res << endl; 
 	return res;
 }
 
@@ -186,9 +225,6 @@ double ** transpose(double ** mat, int n){
 	return transpose_mat;
 }
 
-// void column_initialize(double * col, int m, int n, double (&f)(double x, double y), double (&g)(double k, double l)){
-// 	return;
-// }
 
 void free_matrix(double ** mat, int n){
 	for(int i = 0; i < n; ++i)

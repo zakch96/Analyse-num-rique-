@@ -2,6 +2,7 @@
 #include<cmath>
 #include<vector>
 #include<string>
+#include "func.h"
 
 using namespace std;
 
@@ -29,6 +30,6 @@ double scalar_product(double *col1, double * col2, int n);
 
 double norm(double * col1, int n);
 
-// void column_initialize(double * col, int m, int n, double (&f)(double x, double y), double (&g)(double k, double l));
+void column_initialize(double * col, int n, int m, double a, double b);
 
 double ** dot_diag(double ** mat1, double * diag, int n);

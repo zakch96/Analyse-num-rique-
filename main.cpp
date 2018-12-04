@@ -6,24 +6,14 @@ int main(){
 	double **mat1 = create_mat(5) ;
 	double **mat2 = create_mat(5) ;
 	double **mat3 = create_mat(5) ;
-	double *col = new double[5];
-
-	// mat_initialize(mat1, 5, 5, 2, 5);
-	// print_matrix(mat1, 9);
-
-	// dot_col(mat1,col,5);
-	// sum_mat(mat1,mat2,5);
-	// dot(mat1,mat2,5);
 
 	
-    
-    delete[] col;
 
     double a [5][5] = {{320, 4, 5, 6, 10},
-    				   {4, 170, 7 ,71,20},
+    				   {4, 300, 7 ,71,20},
     				   {5, 7, 200, 5,  2}, 
     				   {6, 71,5,350,4}, 
-    				   {10, 20,2,4,190}};
+    				   {10, 20,2,4,250}};
 
     double a2 [4][4] = {{1, 1, 1, 1 },
                         {1, 5, 5, 5 },
@@ -45,17 +35,26 @@ int main(){
     }
     for (int i = 0 ; i < 4; i++){
         for (int j = 0; j < 4; j++){
-            mat2[i][j] = a2[i][j] ;
+            mat2[i][j] = a2[i][j];
             mat3[i][j] = a3[i][j];
         }
     }
-    // cout << "print before" << endl;
-    // print_matrix(mat1, 5);
-    // ldl_decomposition(mat1 , 5);
-    // cout << "after calling solve_cholesky" << endl;
-    // print_matrix(mat1, 5);
-    // Cholesky_Decomposition(mat1, lower1, 5);
-    // Cholesky_Decomposition(mat2, lower2, 4);
+    print_matrix(mat1, 5);
+    ldl_decomposition(mat1 , 5);
+    cout << "after calling solve_cholesky" << endl;
+    print_matrix(mat1, 5);
+    Cholesky_Decomposition(mat1, lower1, 5);
+    double * col_1 = create_col(5);
+    double col1[5] =  {3, 8, 1, 2, 7};
+    for ( int i = 0; i < 5 ; i++) col_1[i] = col1[i];
+    double * sol_1 = solve_cholesky(mat1, col_1, 5);
+    cout << "TEST CHOLESKY CAS = 5" << endl;
+    cout << "cholesky_sol = " ;
+    double *product_1 = create_col(5);
+    product_1 = dot_col(mat1, sol_1, 5);
+    print_array(product_1, 5);
+ 
+
     double arr [4] = {1,2,3,3};
     double * b = new double[4];
     for ( int i = 0 ; i < 5 ; i++) b[i] = arr[i];
@@ -69,8 +68,8 @@ int main(){
     cout << "last print solution b = " ;
     print_array(solution, 4);
     //double w = 1.5;
-    double ** c = precond_ssor(mat2, 4, 1);
     cout << "PRECOND SSOR TEST" << endl;
+    double ** c = precond_ssor(mat2, 4, 1);
     print_matrix(c, 4);
     //grad conj test
     cout << "Grad conj SSOR test " << endl;
@@ -96,12 +95,69 @@ int main(){
     double min_lambda = min_eigenvalue(mat3, 4, x2, 0.0001);
     cout << "min_lambda = " << min_lambda << endl;
 
+    //SYSTEM RESOLUTION
+    cout << "" << endl;
+    cout << "SYSTEM RESOLUTION TEST" << endl;
+    cout << "" << endl;
+
+    int n = 2;
+    int m = 2;
+    int dim = n*m;
+    double a0 = 1.0;
+    double b0 = 2.0;
+    double ** mat = create_mat(dim);
+    mat_initialize(mat, n, m, a0, b0);
+    double symetrique = 0.0;
+    for (int i = 0; i < dim ; i++){
+        for(int j = 0; j < dim; j++){
+            if (mat[i][j] != mat[j][i]){
+                cout <<"INITIALIZED MATRIX IS NOT SYMMETRIC" << endl;
+                symetrique = -1;
+            }
+        }
+    }
+    cout << "symetrique = " <<  symetrique << endl;
+    cout << " " << endl;
+    cout << "after initialization__ mat = ";
+    print_matrix(mat, dim);
+    double * col = create_col(dim);
+    column_initialize(col, n, m, a0, b0);
+    cout << " " << endl;
+    cout << "after initialization__ b = ";
+    print_array(col, dim);
+    double w = 1;
+    double eps = 0.01;
+    //double ** c2 = precond_ssor(mat, dim, w);
+    double * b2 = grad_conj_precond(mat, col, dim, w, eps);
+    cout << " " << endl;
+    cout << "after calling grad conj,  solution b2 = ";
+    print_array(b2, dim);
+    cout << "col = " ;
+    print_array(col, dim);
+    cout << "product = " ;
+    double * tmp__0 = dot_col(mat, b2, dim);
+    print_array(tmp__0,dim);
+
+    cout << "TESTING WITH CHOLESKY " << endl;
+    double * just_testing = solve_cholesky(mat,col , dim);
+    cout << "test = ";
+    print_array(just_testing, dim);
+    double * cholesky_solution = dot_col(mat, col, dim);
+    cout << "must equal b = " ;
+    print_array(cholesky_solution, dim);
+
+
     //free memory
+    delete[] col_1;
     free_matrix(mat1,5);
     free_matrix(mat2,4);
     free_matrix(mat3,4);
     free_matrix(lower1,5);
     free_matrix(lower2,4);
 
+
+
+
 	return 0;
+
 }
