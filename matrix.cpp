@@ -137,7 +137,6 @@ void mat_initialize(double ** mat, int n, int m, double a, double b){
 	double d = (2./pow(h,2)) + (2./pow(k,2)) ; 
 
 	for (int i = 0; i < dim ; i++ ){
-		mat[i][i] = d ;
 		if (i >= 1)
 			mat[i][i-1] = -1./pow(h,2); 
 		if (i <= dim-2)
@@ -148,6 +147,7 @@ void mat_initialize(double ** mat, int n, int m, double a, double b){
 			mat[i][i-n] = -1./pow(k,2) ;
 		if ( i <= dim - n - 1)
 			mat[i][i+n] = -1./pow(k,2);
+		mat[i][i] = d ;
 	}
 
 	for (int j = m; j < dim-m+1; j=j+m){
@@ -155,7 +155,7 @@ void mat_initialize(double ** mat, int n, int m, double a, double b){
 	}
 	for ( int k = dim - m-1; k>m-2; k = k-m){
 		mat[k][k+1] = 0. ;
-	}
+	} 
 }
 
 void column_initialize(double * col, int n, int m, double a, double b){
@@ -167,28 +167,21 @@ void column_initialize(double * col, int n, int m, double a, double b){
 	double h = a/m+1;
 	double k = b/n+1;
 
-	for(int i = 0; i < m; i++){
+	for(int i = 1; i < m; i++){
 		for (int j = 0; j < n; j++)
-			col[i+(j-1)*m] = f(x[i],y[j]);
+			col[i+(j-1)*m] = f(i*h, j*h);
 	}
 
-	for(int i = 0; i < m; i++){
-		x[i] = i * h;
-	}
-	for(int i = 0; i < n; i++){
-		y[i] = i * k;
-	}
-
-	for ( int i = 0; i < m-1; i++){
+	for ( int i = 1; i < m-1; i++){
 		col[i + (n-1)*m] = f(i, n) + (g(x[i], b)/pow(k,2));
 	}
-	for ( int i = 0; i < m-1; i++){
+	for ( int i = 1; i < m-1; i++){
 		col[i] = f(i, 1) + (g(x[i], 0)/pow(k,2));
 	}
-	for ( int j = 0; j < n-1; j++){
+	for ( int j = 1; j < n-1; j++){
 		col[1+(j-1)*m] = f(1, j) + (g(0, y[j])/pow(h,2));
 	}
-	for ( int j = 0; j < n-1; j++){
+	for ( int j = 1; j < n-1; j++){
 		col[m+(j-1)*m] = f(m, j) + (g(a, y[j])/pow(h,2));
 	}
 	col[0] = f(h, k) + g(h, 0)/pow(k, 2) + g(0, k)/pow(h, 2);

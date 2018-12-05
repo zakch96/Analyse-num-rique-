@@ -56,13 +56,15 @@ double ** precond_ssor(double ** a, int n, double w){
     return c;
 }
 
+
+
 double * grad_conj_precond(double ** a, double * b, int n, double w = 1, double eps = pow(10,-12)){
     //variables initialization
-    int max_iter = 7000;
+    int max_iter = 5000;
     int k = 0;
     double * x = create_col(n);
     for ( int i = 0; i < n ; i++)
-        x[i] = 0.0;
+        x[i] = 0.001   ;
     double * x_1 = create_col(n);
     double * r = create_col(n);
     double * r_1 = create_col(n);
@@ -85,11 +87,11 @@ double * grad_conj_precond(double ** a, double * b, int n, double w = 1, double 
     print_array(r, n);
 
     p = solve_cholesky(c, r, n);
-    cout << "solve_cholesky solution = ";
+    cout << "solve_cholesky p = ";
     print_array(p,n);
 
     double * cholesky_test = dot_col(c, p, n);
-    cout << "cholesky_test product =" ;
+    cout << "(must be equal r ) cholesky_test product =" ;
     print_array(cholesky_test, n);
 
     for (int i = 0; i < n; i++){
@@ -104,8 +106,6 @@ double * grad_conj_precond(double ** a, double * b, int n, double w = 1, double 
     }
 
     double q = norm(r,n)/norm(b, n);
-    cout << "norm(r,n) = " << norm(r,n) << endl;
-    cout << "norm(b,n) = " << norm(b,n) << endl;
     cout << "q = " << q << endl;
 
     //step k
@@ -116,8 +116,6 @@ double * grad_conj_precond(double ** a, double * b, int n, double w = 1, double 
         cout << "x = ";
         print_array(x,n);
         for ( int i = 0; i < n; i++){
-            cout << "x_1 = " << x_1[i] << endl ;
-            cout << "r_1 = " << x_1[i] << endl ;
             x_1[i] = x_1[i] + alpha * p[i];
             r_1[i] = r_1[i] - alpha * tmp[i];
         }
@@ -169,42 +167,81 @@ double * grad_conj_precond(double ** a, double * b, int n, double w = 1, double 
 
 
 
-// double* Grad_Conjug(double** A, double* b, double* x_k, int n)
-// {
-//   int count_itere = 0;
-//   double* r_k = new double[n];
-//   double* p_k = new double[n];
-//   double* r_k_1 = new double[n];
-//   double* x_k_1 = new double[n];
-//   double* p_k_1 = new double[n];
-//   double* prod_mat_vec_x = dot_col(A, x_k, n);
-//   double* prod_mat_vec_p = dot_col(A, p_k, n);
-//   for(int i=0; i<n; i++)
-//     r_k[i] = b[i] - prod_mat_vec_x[i];
-//   for(int i=0; i<n; i++)
-//     p_k[i] = r_k[i];
-//   double alpha_k;
-//   double beta_k;
-//   while(1){
-//     alpha_k = scalar_product(r_k, r_k, n)/scalar_product(p_k, prod_mat_vec_p, n);
-//     for(int i=0; i<n; i++){
-//       x_k_1[i] = x_k[i] + alpha_k*p_k[i];
-//       r_k_1[i] = r_k[i] - alpha_k*prod_mat_vec_p[i];
-//     }
-//     count_itere++;
-//     if("r_k_1 est suffisamment petit"){
-//       cout << "le nombre d'itérations est" << count_itere << endl;
-//       return x_k_1;
-//     }
-//     beta_k = scalar_product(r_k_1, r_k_1, n)/scalar_product(r_k, r_k, n);
-//     for(int i=0; i<n; i++)
-//       p_k_1[i] = r_k_1[i] + beta_k*p_k[i];
-//     for(int i=0; i<n; i++){
-//       r_k[i] = r_k_1[i];
-//       p_k[i] = p_k_1[i];
-//     }
-//   }
-// }
+double* Grad_Conjug(double** A, double* b, double* x_k, int dim, double epsilon) 
+{   
+    int count_itere = 0;
+    double* r_k = new double[dim];
+    double* p_k = new double[dim];
+    double* r_k_1 = new double[dim];
+    double* x_k_1 = new double[dim];
+    double* p_k_1 = new double[dim];
+    double* dot_x = dot_col(A, x_k, dim);
+    double* dot_p = new double[dim];
+    double * diff = create_col(dim);
+    for(int i=0; i<dim; i++)
+        r_k[i] = b[i] - dot_x[i];
+    for(int i=0; i<dim; i++){
+        p_k[i] = r_k[i];
+    }
+    double alpha_k;
+    double beta_k;
+    while(1){
+        dot_p = dot_col(A, p_k, dim);
+        alpha_k = scalar_product(r_k, r_k, dim)/scalar_product(dot_p, p_k, dim);
+        for(int i=0; i<dim; i++){
+          x_k_1[i] = x_k[i] + alpha_k*p_k[i];
+          r_k_1[i] = r_k[i] - alpha_k*dot_p[i]; 
+        }
+        count_itere++;
+        cout << "scalar_product = " <<scalar_product(r_k_1, r_k_1, dim) <<endl;
+        if(scalar_product(r_k_1, r_k_1, dim) < epsilon){
+          delete []r_k;
+          delete []p_k;
+          delete []r_k_1;
+          delete []p_k_1;
+          delete []dot_x;
+          delete []dot_p;
+          cout << "le nombre d'itérations est :   " << count_itere << endl;
+          return x_k_1;
+        }
+        beta_k = scalar_product(r_k_1, r_k_1, dim)/scalar_product(r_k, r_k, dim);
+        for(int i=0; i<dim; i++)
+            p_k_1[i] = r_k_1[i] + beta_k*p_k[i];
+        for(int i=0; i<dim; i++){
+            r_k[i] = r_k_1[i];
+            p_k[i] = p_k_1[i];
+            x_k[i] = x_k_1[i];
+        }
+        for (int i = 0; i < dim; i++){
+            diff[i] = abs(dot_col(A, x_k, dim)[i] - b[i]);
+        }
+        cout << "diff array & norme = ";
+        print_array(diff, dim);
+        cout << "nor =  " << endl;
+        cout << norm(diff, dim);
+    }
+    double * test_grad_conjug = create_col(dim);
+    test_grad_conjug = dot_col(A, x_k, dim);
+    cout << "dot_col = " ;
+    print_array(test_grad_conjug, dim);
+    cout << "must_ be equal to ";
+    print_array(b, dim);
+}
+
+double erreur_2(double * x, int n, int m, double a, double b){
+    double sum = 0.;
+    double denom = 0.;
+    double h = a/m+1;
+    double k = b/n+1;
+    for ( int i = 0; i < m; i++){
+        for (int j =0 ; j < n; j++){
+            sum+= pow(x[i+(j-1)*m] - f(i*h,j*k),2);
+            denom += pow(f(i*h, j*k), 2);
+        }   
+    }
+    return sqrt(sum/denom);
+}
+
 
 
 
